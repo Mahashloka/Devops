@@ -1,975 +1,2010 @@
-## Containers
+## Kubernetes
 
-### Containers Exercises
+### Kubernetes Exercises
+
+#### Developer & "Regular" User Path
 
 |Name|Topic|Objective & Instructions|Solution|Comments|
 |--------|--------|------|----|----|
-|Running Containers|Basics|[Exercise](running_containers.md)|[Solution](solutions/running_containers.md)
-|Containerized Web Server|Basics|[Exercise](containerized_web_server.md)|[Solution](solutions/containerized_web_server.md)
-|Working with Images|Image|[Exercise](working_with_images.md)|[Solution](solutions/working_with_images.md)
-|My First Dockerfile|Dockerfile|[Exercise](write_dockerfile_run_container.md)|
-|Run, Forest, Run!|Restart Policies|[Exercise](run_forest_run.md)|[Solution](solutions/run_forest_run.md)
-|Layer by Layer|Image Layers|[Exercise](image_layers.md)|[Solution](solutions/image_layers.md)
-|Containerize an application | Containerization |[Exercise](containerize_app.md)|[Solution](solutions/containerize_app.md)
-|Multi-Stage Builds|Multi-Stage Builds|[Exercise](multi_stage_builds.md)|[Solution](solutions/multi_stage_builds.md)
+| My First Pod | Pods | [Exercise](pods_01.md) | [Solution](solutions/pods_01_solution.md)
+| "Killing" Containers | Pods | [Exercise](killing_containers.md) | [Solution](solutions/killing_containers.md)
+| Creating a Service | Service | [Exercise](services_01.md) | [Solution](solutions/services_01_solution.md)
+| Creating a ReplicaSet | ReplicaSet | [Exercise](replicaset_01.md) | [Solution](solutions/replicaset_01_solution.md)
+| Operating ReplicaSets | ReplicaSet | [Exercise](replicaset_02.md) | [Solution](solutions/replicaset_02_solution.md)
+| ReplicaSets Selectors | ReplicaSet | [Exercise](replicaset_03.md) | [Solution](solutions/replicaset_03_solution.md)
 
-### Containers Self Assessment
+### Kubernetes Self Assessment
 
-* [Containers 101](#questions-containers-101)
-* [OCI](#questions-oci)
-* [Images](#questions-images)
-* [Basic Commands](#questions-basic-commands)
-* [Volume](#questions-volume)
-* [Dockerfile](#questions-dockerfile)
-* [Architecture](#questions-architecture)
-* [Docker Architecture](#questions-docker-architecture)
-* [Docker Compose](#questions-docker-compose)
-* [Docker Images](#questions-docker-images)
-* [Networking](#questions-networking)
-* [Docker Networking](#questions-docker-networking)
-* [Security](#questions-security)
-* [Docker In Production](#questions-docker-in-production)
+* [Kubernetes 101](#kubernetes-101)
+* [Kubernetes Hands-On Basics](#kubernetes-hands-on-basiscs)
+* [Kubernetes Cluster](#kubernetes-cluster)
+* [Kubernetes Pods](#kubernetes-pods)
+* [Kubernetes Deployments](#kubernetes-deployments)
+* [Kubernetes Services](#kubernetes-services)
 
-<a name="questions-containers-101"></a>
-#### Containers 101
+<a name="kubernetes-101"></a>
+#### Kubernetes 101
 
 <details>
-<summary>What is a Container?</summary><br><b>
+<summary>What is Kubernetes? Why organizations are using it?</summary><br><b>
 
-This can be tricky to answer since there are many ways to create a containers:
+Kubernetes is an open-source system for automating deployment, scaling, and management of containerized applications.
 
-  - Docker
-  - systemd-nspawn
-  - LXC
+To understand what Kubernetes is good for, let's look at some examples:
 
-If to focus on OCI (Open Container Initiative) based containers, it offers the following [definition](https://github.com/opencontainers/runtime-spec/blob/master/glossary.md#container): "An environment for executing processes with configurable isolation and resource limitations. For example, namespaces, resource limits, and mounts are all part of the container environment."
+<a name="kubernetes-101"></a>
+#### Kubernetes 101
+
+<details>
+<summary>What is Kubernetes? Why organizations are using it?</summary><br><b>
+
+Kubernetes is an open-source system for automating deployment, scaling, and management of containerized applications.
+
+To understand what Kubernetes is good for, let's look at some examples:
+
+* You would like to run a certain application in a container on multiple different locations. Sure, if it's 2-3 servers/locations, you can do it by yourself but it can be challenging to scale it up to additional multiple location.<br>
+* Performing updates and changes across hundreds of containers<br>
+* Handle cases where the current load requires to scale up (or down)
 </b></details>
 
 <details>
-<summary>Why containers are needed? What is their goal?</summary><br><b>
+<summary>When or why NOT to use Kubernetes?</summary><br><b>
 
-OCI provides a good [explanation](https://github.com/opencontainers/runtime-spec/blob/master/principles.md#the-5-principles-of-standard-containers): "Define a unit of software delivery called a Standard Container. The goal of a Standard Container is to encapsulate a software component and all its dependencies in a format that is self-describing and portable, so that any compliant runtime can run it without extra dependencies, regardless of the underlying machine and the contents of the container."
+  - If you manage low level infrastructure or baremetals, Kubernetes is probably not what you need or want
+  - If you are a small team (like less than 20 engineers) running less than a dozen of containers, Kubernetes might be an overkill (even if you need scale, rolling out updates, etc.). You might still enjoy the benefits of using managed Kubernetes, but you definitely want to think about it carefully before making a decision
 </b></details>
 
 <details>
-<summary>How are containers different from virtual machines (VMs)?</summary><br><b>
+<summary>What are some of Kubernetes features?</summary><br><b>
 
-The primary difference between containers and VMs is that containers allow you to virtualize
-multiple workloads on a single operating system while in the case of VMs, the hardware is being virtualized to run multiple machines each with its own guest OS.
-You can also think about it as containers are for OS-level virtualization while VMs are for hardware virtualization.
+  - Self-Healing: Kubernetes uses health checks to monitor containers and run certain actions upon failure or other type of events, like restarting the container
+  - Load Balancing: Kubernetes can split and/or balance requests to applications running in the cluster, based on the state of the Pods running the application
+  - Operators: Kubernetes packaged applications that can use the API of the cluster to update its state and trigger actions based on events and application state changes
+  - Automated Rollout: Gradual updates roll out to applications and support in roll back in case anything goes wrong
+  - Scaling: Scaling horizontally (down and up) based on different state parameters and custom defined criteria
+  - Secrets: you have a mechanism for storing user names, passwords and service endpoints in a private way, where not everyone using the cluster are able to view it
+</b></details>
 
-* Containers don't require an entire guest operating system as VMs. Containers share the system's kernel as opposed to VMs. They isolate themselves via the use of kernel's features such as namespaces and cgroups
-* It usually takes a few seconds to set up a container as opposed to VMs which can take minutes or at least more time than containers as there is an entire OS to boot and initialize as opposed to containers which has share of the underlying OS
-* Virtual machines considered to be more secured than containers
-* VMs portability considered to be limited when compared to containers
+<a name="kubernetes-hands-on-basics"></a>
+#### Kubernetes - Hands-On Basics
+
+<details>
+<summary>What Kubernetes objects are there?</summary><br><b>
+
+  * Pod
+  * Service
+  * ReplicationController
+  * ReplicaSet
+  * DaemonSet
+  * Namespace
+  * ConfigMap
+  ...
 </b></details>
 
 <details>
-<summary>Do we need virtual machines in the edge of containers? Are they still relevant?</summary><br><b>
+<summary>What fields are mandatory with any Kubernetes object?</summary><br><b>
+
+metadata, kind and apiVersion
 </b></details>
 
 <details>
-<summary>In which scenarios would you use containers and in which you would prefer to use VMs?</summary><br><b>
+<summary>What actions or operations you consider as best practices when it comes to Kubernetes?</summary><br><b>
 
-You should choose VMs when:
-  * You need run an application which requires all the resources and functionalities of an OS
-  * You need full isolation and security
-
-You should choose containers when:
-  * You need a lightweight solution
-  * Running multiple versions or instances of a single application
+  - Always make sure Kubernetes YAML files are valid. Applying automated checks and pipelines is recommended.
+  - Always specify requests and limits to prevent situation where containers are using the entire cluster memory which may lead to OOM issue
 </b></details>
 
 <details>
-<summary>Describe the process of containerizing an application</summary><br><b>
+<summary>What is kubectl?</summary><br><b>
 
-1. Write a Dockerfile that includes your app (including the commands to run it) and its dependencies
-2. Build the image using the Dockefile you wrote
-3. You might want to push the image to a registry
-4. Run the container using the image you've built
+Kubectl is the Kubernetes command line tool that allows you to run commands against Kubernetes clusters. For example, you can use kubectl to deploy applications, inspect and manage cluster resources, and view logs.
+</b></details>
+<details>
+
+<summary>What Kubernetes objects do you usually use when deploying applications in Kubernetes?</summary><br><b>
+
+* Deployment - creates the Pods () and watches them
+* Service: route traffic to Pods internally
+* Ingress: route traffic from outside the cluster
+</b></details>
+
+<a name="kubernetes-cluster"></a>
+#### Kubernetes - Cluster
+
+<details>
+<summary>What is a Kubernetes Cluster?</summary><br><b>
+
+Red Hat Definition: "A Kubernetes cluster is a set of node machines for running containerized applications. If you’re running Kubernetes, you’re running a cluster.
+At a minimum, a cluster contains a worker node and a master node."
+
+Read more [here](https://www.redhat.com/en/topics/containers/what-is-a-kubernetes-cluster)
 </b></details>
 
 <details>
-<summary>What are some of the advantages in using containers? you can compare to other options like VMs</summary><br><b>
+<summary>What is a Node?</summary><br><b>
 
-* Reusable: container can be used by multiple different users for different usages - production vs. staging, development, testing, etc.
-* Lightweight: containers are fairly lightweight which means deployments can be done quickly since you don't need to install a full OS (as in VMs for example)
-* Isolation: Containers are isolated environments, usually changes made to the OS won't affect the containers and vice-versa
-</b></details>
-
-<a name="questions-oci"></a>
-#### Containers - OCI
-
-<details>
-<summary>What is the OCI?</summary><br><b>
-
-OCI (Open Container Initiative) is an open governance established in 2015 to standardize container creation - mostly image format and runtime. At that time there were a number of parties involved and the most prominent one was Docker.
-
-Specifications published by OCI:
-
-  - [image-spec](https://github.com/opencontainers/image-spec)
-  - [runtime-spec](https://github.com/opencontainers/runtime-spec)
+A node is a virtual or a physical machine that serves as a worker for running the applications.<br>
+It's recommended to have at least 3 nodes in a production environment.
 </b></details>
 
 <details>
-<summary>Which operations OCI based containers must support?</summary><br><b>
+<summary>What the master node is responsible for?</summary><br><b>
 
-Create, Kill, Delete, Start and Query State.
-</b></details>
+The master coordinates all the workflows in the cluster:
 
-<a name="questions-images"></a>
-#### Containers - Images
-
-<details>
-<summary>What is a container image?</summary><br><b>
-
-* An image of a container contains the application, its dependencies and the operating system where the application is executed.<br>
-* It's a collection of read-only layers. These layers are loosely coupled
-  * Each layer is assembled out of one or more files
+* Scheduling applications
+* Managing desired state
+* Rolling out new updates
 </b></details>
 
 <details>
-<summary>Why container images are relatively small?</summary><br><b>
+<summary>Which command will list the nodes of the cluster?</code></summary><br><b>
 
-* Most of the images don't contain Kernel. They share and access the one used by the host on which they are running
-* Containers intended to run specific application in most cases. This means they hold only what the application needs in order to run
+`kubectl get nodes`
 </b></details>
 
 <details>
-<summary>You are interested in running a container with snake game application. How can you search for such image and check if it exists?</summary><br><b>
+<summary>True or False? Every cluster must have 0 or more master nodes and at least 1 worker</summary><br><b>
 
-`podman search snake-game`. Surprisingly, there are a couple of matches :)
+False. A Kubernetes cluster consists of at least 1 master and can have 0 workers (although that wouldn't be very useful...)
+</b></details> 
 
-```
-INDEX       NAME                                                                DESCRIPTION                                      STARS
-docker.io   docker.io/dyego/snake-game                                                                                           0
-docker.io   docker.io/ainizetap/snake-game                                                                                       0
-docker.io   docker.io/islamifauzi/snake-games                                                                                    0
-docker.io   docker.io/harish1551/snake-game                                                                                      0
-docker.io   docker.io/spkane/snake-game                                         A console based snake game in a container        0
-docker.io   docker.io/rahulgadre/snake-game                                     This repository contains all the files to ru...  0
-```
+<details>
+<summary>What are the components of the master node?</summary><br><b>
+
+  * API Server - the Kubernetes API. All cluster components communicate through it
+  * Scheduler - assigns an application with a worker node it can run on
+  * Controller Manager - cluster maintenance (replications, node failures, etc.)
+  * etcd - stores cluster configuration
 </b></details>
 
 <details>
-<summary>How to list the container images on certain host?</summary><br><b>
+<summary>What are the components of a worker node?</summary><br><b>
 
-CONTAINER_BINARY=podman # or docker
-$CONTAINER_BINARY images
-```
-
-Note: you can also use `$CONTAINER_RUNTIME image ls`
+  * Kubelet - an agent responsible for node communication with the master.
+  * Kube-proxy - load balancing traffic between app components
+  * Container runtime - the engine runs the containers (Podman, Docker, ...)
 </b></details>
 
 <details>
-<summary>How to download/pull a container image without actually running a container?</summary><br><b>
-
-```
-CONTAINER_BINARY=podman # or docker
-$CONTAINER_BINARY pull rhel
-```
+<summary>Place the components on the right side of the image in the right place in the drawing<br>
+<img src="images/kubernetes_components.png"/>
+</summary><br><b>
+<img src="images/kubernetes_components_solution.png"/>
 </b></details>
 
 <details>
-<summary>How the centralized location, where images are stored, is called?</summary><br><b>
+<summary>You are managing multiple Kubernetes clusters. How do you quickly change between the clusters using kubectl?</summary><br><b>
 
-Registry
+`kubectl config use-context`
 </b></details>
 
 <details>
-<summary>A registry contains one or more <code>____</code> which in turn contain one or more <code>____</code></summary><br><b>
+<summary>How do you prevent high memory usage in your Kubernetes cluster and possibly issues like memory leak and OOM?</summary><br><b>
 
-A registry contains one or more repositories which in turn contain one or more images.
+Apply requests and limits, especially on third party applications (where the uncertainty is even bigger)
 </b></details>
 
 <details>
-<summary>How to find out which registry do you use by default from your environment?</summary><br><b>
+<summary>Do you have experience with deploying a Kubernetes cluster? If so, can you describe the process in high-level?</summary><br><b>
 
-Depends on the containers technology you are using. For example, in case of Docker, it can be done with `docker info`
+1. Create multiple instances you will use as Kubernetes nodes/workers. Create also an instance to act as the Master. The instances can be provisioned in a cloud or they can be virtual machines on bare metal hosts.
+2. Provision a certificate authority that will be used to generate TLS certificates for the different components of a Kubernetes cluster (kubelet, etcd, ...)
+  1. Generate a certificate and private key for the different components
+3. Generate kubeconfigs so the different clients of Kubernetes can locate the API servers and authenticate.
+4. Generate encryption key that will be used for encrypting the cluster data
+5. Create an etcd cluster
+</b></details>
 
-```
-> docker info
-Registry: https://index.docker.io/v1
-```
+<a name="kubernetes-pods"></a>
+#### Kubernetes - Pods
+
+<details>
+<summary>Explain what is a Pod</summary><br><b>
+
+A Pod is a group of one or more containers, with shared storage and network resources, and a specification for how to run the containers.<br>
+Pods are the smallest deployable units of computing that you can create and manage in Kubernetes. 
 </b></details>
 
 <details>
-<summary>How to retrieve the latest ubuntu image?</summary><br><b>
+<summary>Deploy a pod called "my-pod" using the nginx:alpine image</summary><br><b>
 
-`podman image pull ubuntu:latest`
+`kubectl run my-pod --image=nginx:alpine --restart=Never`
+
+If you are a Kubernetes beginner you should know that this is not a common way to run Pods. The common way is to run a Deployment which in turn runs Pod(s).<br>
+In addition, Pods and/or Deployments are usually defined in files rather than executed directly using only the CLI arguments.
 </b></details>
 
 <details>
-<summary>True or False? It's not possible to remove an image if a certain container is using it</summary><br><b>
+<summary>What are your thoughts on "Pods are not meant to be created directly"?</summary><br><b>
 
-True. You should stop and remove the container before trying to remove the image it uses.
+Pods are usually indeed not created directly. You'll notice that Pods are usually created as part of another entities such as Deployments or ReplicaSets.<br>
+If a Pod dies, Kubernetes will not bring it back. This is why it's more useful for example to define ReplicaSets that will make sure that a given number of Pods will always run, even after a certain Pod dies.
 </b></details>
 
 <details>
-<summary>True or False? If a tag isn't specified when pulling an image, the 'latest' tag is being used</summary><br><b>
+<summary>How many containers can a pod contain?</summary><br><b>
 
-True
+A pod can include multiple containers but in most cases it would probably be one container per pod.
 </b></details>
 
 <details>
-<summary>True or False? Using the 'latest' tag when pulling an image means, you are pulling the most recently published image</summary><br><b>
+<summary>What use cases exist for running multiple containers in a single pod?</summary><br><b>
 
-False. While this might be true in some cases, it's not guaranteed that you'll pull the latest published image when using the 'latest' tag.<br>
-For example, in some images, 'edge' tag is used for the most recently published images.
+A web application with separate (= in their own containers) logging and monitoring components/adapters is one examples.<br>
+A CI/CD pipeline (using Tekton for example) can run multiple containers in one Pod if a Task contains multiple commands.
 </b></details>
 
 <details>
-<summary>Where pulled images are stored?</summary><br><b>
+<summary>What are the possible Pod phases?</summary><br><b>
 
-Depends on the container technology being used. For example, in case of Docker, images are stored in `/var/lib/docker/`
+  * Running - The Pod bound to a node and at least one container is running
+  * Failed - At least one container in the Pod terminated with a failure
+  * Succeeded - Every container in the Pod terminated with success
+  * Unknown - Pod's state could not be obtained
+  * Pending - Containers are not yet running (Perhaps images are still being downloaded or the pod wasn't scheduled yet)
 </b></details>
 
 <details>
-<summary>Explain container image layers</summary><br><b>
+<summary>True or False? By default, pods are isolated. This means they are unable to receive traffic from any source</summary><br><b>
 
-  - The layers of an image is where all the content is stored - code, files, etc.
-  - Each layer is independent
-  - Each layer has an ID that is an hash based on its content
-  - The layers (as the image) are immutable which means a change to one of the layers can be easily identified
+False. By default, pods are non-isolated = pods accept traffic from any source.
 </b></details>
 
 <details>
-<summary>True or False? Changing the content of any of the image layers will cause the hash content of the image to change</summary><br><b>
+<summary>True or False? The "Pending" phase means the Pod was not yet accepted by the Kubernetes cluster so the scheduler can't run it unless it's accepted</summary><br><b>
 
-True. These hashes are content based and since images (and their layers) are immutable, any change will cause the hashes to change.
+False. "Pending" is after the Pod was accepted by the cluster, but the container can't run for different reasons like images not yet downloaded.
 </b></details>
 
 <details>
-<summary>How to list the layers of an image?</summary><br><b>
+<summary>How to list the pods in the current namespace?</code></summary><br><b>
 
-In case of Docker, you can use `docker image inspect <name>`
+`kubectl get po`
 </b></details>
 
 <details>
-<summary>True or False? In most cases, container images contain their own kernel</summary><br><b>
+<summary>How view all the pods running in all the namespaces?</code></summary><br><b>
 
-False. They share and access the one used by the host on which they are running.
+`kubectl get pods --all-namespaces`
 </b></details>
 
 <details>
-<summary>True or False? A single container image can have multiple tags</summary><br><b>
+<summary>True or False? A single Pod can be split across multiple nodes</code></summary><br><b>
 
-True. When listing images, you might be able to see two images with the same ID but different tags.
+False. A single Pod can run on a single node.
 </b></details>
 
 <details>
-<summary>What is a dangling image?</summary><br><b>
+<summary>How to delete a pod?</code></summary><br><b>
 
-It's an image without tags attached to it.
-One way to reach this situation is by building an image with exact same name and tag as another already existing image. It can be still referenced by using its full SHA.
+`kubectl delete pod pod_name`
 </b></details>
 
 <details>
-<summary>How to see changes done to a given image over time?</summary><br><b>
+<summary>How to find out on which node a certain pod is running?</summary><br><b>
 
-In the case of Docker, you could use `docker history <name>`
+`kubectl get po -o wide`
 </b></details>
 
 <details>
-<summary>True or False? Multiple images can share layers</summary><br><b>
+<summary>What are "Static Pods"?</summary><br><b>
 
-True.<br>
-One evidence for that can be found in pulling images. Sometimes when you pull an image, you'll see a line similar to the following:<br>
-`fa20momervif17: already exists`
+* Managed directly by Kubelet on specific node
+* API server is not observing static Pods
+* For each static Pod there is a mirror Pod on kubernetes API server but it can't be managed from there
 
-This is because it recognizes such layer already exists on the host, so there is no need to pull the same layer twice.
+Read more about it [here](https://kubernetes.io/docs/tasks/configure-pod-container/static-pod)
 </b></details>
 
 <details>
-<summary>What is the digest of an image? What problem does it solves?</summary><br><b>
-
-Tags are mutable. This is mean that we can have two different images with the same name and the same tag. It can be very confusing to see two images with the same name and the same tag in your environment. How would you know if they are truly the same or are they different?<br>
-
-This is where "digests` come handy. A digest is a content-addressable identifier. It isn't mutable as tags. Its value is predictable and this is how you can tell if two images are the same content wise and not merely by looking at the name and the tag of the images.
-</b></details>
-
-<details>
-<summary>True or False? A single image can support multiple architectures (Linux x64, Windows x64, ...)</summary><br><b>
+<summary>True or False? A volume defined in Pod can be accessed by all the containers of that Pod</summary><br><b>
 
 True.
 </b></details>
 
 <details>
-<summary>What is a distribution hash in regards to layers?</summary><br><b>
+<summary>What happens when you run a Pod?</summary><br><b>
 
-  - Layers are compressed when pushed or pulled
-  - distribution hash is the hash of the compressed layer
-  - the distribution hash used when pulling or pushing images for verification (making sure no one tempered with image or layers)
-  - It's also used for avoiding ID collisions (a case where two images have exactly the same generated ID)
+1. Kubectl sends a request to the API server to create the Pod
+2. The Scheduler detects that there is an unassigned Pod (by monitoring the API server)
+3. The Scheduler chooses a node to assign the Pod to
+4. The Scheduler updates the API server about which node it chose
+5. Kubelet (which also monitors the API server) notices there is a Pod assigned to the same node on which it runs and that Pod isn't running
+6. Kubelet sends request to the container engine (e.g. Docker) to create and run the containers
+7. An update is sent by Kubelet to the API server (notifying it that the Pod is running)
 </b></details>
 
 <details>
-<summary>How multi-architecture images work? Explain by describing what happens when an image is pulled</summary><br><b>
+<summary>How to confirm a container is running after running the command <code>kubectl run web --image nginxinc/nginx-unprivileged</code></summary><br><b>
 
-1. A client makes a call to the registry to use a specific image (using an image name and optionally a tag)
-2. A manifest list is parsed (assuming it exists) to check if the architecture of the client is supported and available as a manifest
-3. If it is supported (a manifest for the architecture is available) the relevant manifest is parsed to obtain the IDs of the layers
-4. Each layer is then pulled using the obtained IDs from the previous step
+* When you run `kubectl describe pods <POD_NAME>` it will tell whether the container is running:
+`Status:       Running`
+* Run a command inside the container: `kubectl exec web -- ls`
 </b></details>
 
 <details>
-<summary>How to check which architectures a certain container image supports?</summary><br><b>
+<summary>After running <code>kubectl run database --image mongo</code> you see the status is "CrashLoopBackOff". What could possibly went wrong and what do you do to confirm?</summary><br><b>
 
-`docker manifest inspect <name>`
+"CrashLoopBackOff" means the Pod is starting, crashing, starting...and so it repeats itself.<br>
+There are many different reasons to get this error - lack of permissions, init-container misconfiguration, persistent volume connection issue, etc.
+
+One of the ways to check why it happened it to run `kubectl describe po <POD_NAME>` and having a look at the exit code
+
+```
+ Last State:     Terminated
+   Reason:       Error
+   Exit Code:    100
+```
+
+Another way to check what's going on, is to run `kubectl logs <POD_NAME>`. This will provide us with the logs from the containers running in that Pod.
 </b></details>
 
 <details>
-<summary>How to check what a certain container image will execute once we'll run a container based on that image?</summary><br><b>
+<summary>Explain the purpose of the following lines
 
-Look for "Cmd" or "Entrypoint" fields in the output of `docker image inspec <image name>`
+```
+livenessProbe:
+  exec:
+    command:
+    - cat
+    - /appStatus
+  initialDelaySeconds: 10
+  periodSeconds: 5
+```
+</summary><br><b>
+
+These lines make use of `liveness probe`. It's used to restart a container when it reaches a non-desired state.<br>
+In this case, if the command `cat /appStatus` fails, Kubernetes will kill the container and will apply the restart policy. The `initialDelaySeconds: 10` means that Kubelet will wait 10 seconds before running the command/probe for the first time. From that point on, it will run it every 5 seconds, as defined with `periodSeconds`
 </b></details>
 
 <details>
-<summary>How to view the instructions that were used to build image?</summary><br><b>
+<summary>Explain the purpose of the following lines
 
-`docker image history <image name>:<tag>`
+```
+readinessProbe:
+      tcpSocket:
+        port: 2017
+      initialDelaySeconds: 15
+      periodSeconds: 20
+```
+</summary><br><b>
+
+They define a readiness probe where the Pod will not be marked as "Ready" before it will be possible to connect to port 2017 of the container. The first check/probe will start after 15 seconds from the moment the container started to run and will continue to run the check/probe every 20 seconds until it will manage to connect to the defined port.
 </b></details>
 
 <details>
-<summary>How <code>docker image build</code> works?</summary><br><b>
+<summary>What does the "ErrImagePull" status of a Pod means?</summary><br><b>
 
-1. Docker spins up a temporary container
-2. Runs a single instruction in the temporary container
-3. Stores the result as a new image layer
-4. Remove the temporary container
-5. Repeat for every instruction
+It wasn't able to pull the image specified for running the container(s). This can happen if the client didn't authenticated for example.<br>
+More details can be obtained with `kubectl describe po <POD_NAME>`.
 </b></details>
 
 <details>
-<summary>What is the role of cache in image builds?</summary><br><b>
+<summary>What happens when you delete a Pod?</summary><br><b>
 
-When you build an image for the first time, the different layers are being cached. So, while the first build of the image might take time, any other build of the same image (given that Dockerfile didn't change or the content used by the instructions) will be instant thanks to the caching mechanism used.
-
-In little bit more details, it works this way:
-1. The first instruction (FROM) will check if base image already exists on the host before pulling it 
-2. For the next instruction, it will check in the build cache if an existing layer was built from the same base image + if it used the same instruction
-  1. If it finds such layer, it skips the instruction and links the existing layer and it keeps using the cache.
-  2. If it doesn't find a matching layer, it builds the layer and the cache is invalidated.
-
-Note: in some cases (like COPY and ADD instructions) the instruction might stay the same but if the content of what being copied is changed then the cache is invalidated. The way this check is done is by comparing the checksum of each file that is being copied.
+1. The `TERM` signal is sent to kill the main processes inside the containers of the given Pod
+2. Each container is given a period of 30 seconds to shut down the processes gracefully
+3. If the grace period expires, the `KILL` signal is used to kill the processes forcefully and the containers as well
 </b></details>
 
 <details>
-<summary>What ways are there to reduce container images size?</summary><br><b>
+<summary>Explain liveness probes</summary><br><b>
 
-  * Reduce number of instructions - in some case you may be able to join layers by installing multiple packages with one instructions for example or using `&&` to concatenate RUN instructions
-  * Using smaller images - in some cases you might be using images that contain more than what is needed for your application to run. It is good to get overview of some images and see whether you can use smaller images that you are usually using.
-  * Cleanup after running commands - some commands, like packages installation, create some metadata or cache that you might not need for running the application. It's important to clean up after such commands to reduce the image size
-  * For Docker images, you can use multi-stage builds
+Liveness probes is a useful mechanism used for restarting the container when a certain check/probe, the user has defined, fails.<br>
+For example, the user can define that the command `cat /app/status` will run every X seconds and the moment this command fails, the container will be restarted.
+
+You can read more about it in [kubernetes.io](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes)
 </b></details>
 
 <details>
-<summary>What are the pros and cons of squashing images?</summary><br><b>
+<summary>Explain readiness probes</summary><br><b>
 
-Pros:
-  * Smaller image
-  * Reducing number of layers (especially if the image has lot of layers)
-Cons:
-  * No sharing of the image layers
-  * Push and pull can take more time (because no matching layers found on target)
-</b></details>
+readiness probes used by Kubelet to know when a container is ready to start running, accepting traffic.<br>
+For example, a readiness probe can be to connect port 8080 on a container. Once Kubelet manages to connect it, the Pod is marked as ready
 
-<a name="questions-basic-commands"></a>
-#### Containers - Basic Commands
-
-<details>
-<summary>How to list all the containers on a given host?</summary><br><b>
-
-In the case of Docker, use: `docker container ls`<br>
-Same with Podman: `podman container ls`
+You can read more about it in [kubernetes.io](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes)
 </b></details>
 
 <details>
-<summary>How to run a container?</summary><br><b>
+<summary>How readiness probe status affect Services when they are combined?</summary><br><b>
 
-Docker: `docker container run ubuntu`<br>
-Podman: `podman container run ubuntu`
+Only containers whose state set to Success will be able to receive requests sent to the Service.
 </b></details>
 
 <details>
-<summary>Why after running <code>podman container run ubuntu</code> the output of <code>podman container ls</code> is empty?</summary><br><b>
+<summary>Why it's usually considered better to include one container per Pod?</summary><br><b>
 
-Because the container immediately exits after running the ubuntu image. This is completely normal and expected as containers designed to run a service or a app and exit when they are done running it.<br>
+One reason is that it makes it harder to scale, when you need to scale only one of the containers in a given Pod.
+</b></details>
 
-If you want the container to keep running, you can run a command like `sleep 100` which will run for 100 seconds or you can attach to terminal of the container with a command similar: `podman container run -it ubuntu /bin/bash`
+<a name="kubernetes-deployments"></a>
+#### Kubernetes - Deployments
+
+<details>
+<summary>What is a "Deployment" in Kubernetes?</summary><br><b>
+
+A Kubernetes Deployment is used to tell Kubernetes how to create or modify instances of the pods that hold a containerized application.
+Deployments can scale the number of replica pods, enable rollout of updated code in a controlled manner, or roll back to an earlier deployment version if necessary. 
+
+A Deployment is a declarative statement for the desired state for Pods and Replica Sets.
 </b></details>
 
 <details>
-<summary>How to attach your shell to a terminal of a running container?</summary><br><b>
+<summary>How to create a deployment?</code></summary><br><b>
 
-`podman container exec -it [container id/name] bash`
-
-This can be done in advance while running the container: `podman container run -it [image:tag] /bin/bash`
+```
+cat << EOF | kubectl create -f -
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+EOF
+```
 </b></details>
 
 <details>
-<summary>True or False? You can remove a running container if it doesn't running anything</summary><br><b>
+<summary>How to edit a deployment?</code></summary><br><b>
 
-False. You have to stop the container before removing it.
+kubectl edit deployment some-deployment
 </b></details>
 
 <details>
-<summary>How to stop and remove a container?</summary><br><b>
+<summary>What happens after you edit a deployment and change the image?</summary><br><b>
 
-`podman container stop <container id/name> && podman container rm <container id/name>`
+The pod will terminate and another, new pod, will be created.
+
+Also, when looking at the replicaset, you'll see the old replica doesn't have any pods and a new replicaset is created.
 </b></details>
 
 <details>
-<summary>What happens when you run <code>docker container run ubuntu</code>?</summary><br><b>
+<summary>How to delete a deployment?</summary><br><b>
 
-1. Docker client posts the command to the API server running as part of the Docker daemon
-2. Docker daemon checks if a local image exists
-  1. If it exists, it will use it
-  2. If doesn't exists, it will go to the remote registry (Docker Hub by default) and pull the image locally
-3. containerd and runc are instructed (by the daemon) to create and start the container
+One way is by specifying the deployment name: `kubectl delete deployment [deployment_name]`
+Another way is using the deployment configuration file: `kubectl delete -f deployment.yaml`
 </b></details>
 
 <details>
-<summary>How to run a container in the background?</summary><br><b>
+<summary>What happens when you delete a deployment?</summary><br><b>
 
-With the -d flag. It will run in the background and will not attach it to the terminal.
-
-`docker container run -d httpd` or `podman container run -d httpd`
-</b></details>
-
-
-<a name="questions-volume"></a>
-#### Containers - Volume
-
-<details>
-<summary>How to create a new volume?</summary><br><b>
-
-`docker volume create some_volume`
-</b></details>
-
-<a name="questions-dockerfile"></a>
-#### Containers - Dockerfile
-
-<details>
-<summary>What is a Dockerfile?</summary><br><b>
-
-Different container engines (e.g. Docker, Podman) can build images automatically by reading the instructions from a Dockerfile. A Dockerfile is a text file that contains all the instructions for building an image which containers can use.
+The pod related to the deployment will terminate and the replicaset will be removed.
 </b></details>
 
 <details>
-<summary>What is the instruction in all Dockefiles and what does it mean?</summary><br><b>
+<summary>How make an app accessible on private or external network?</summary><br><b>
 
-The first instruction is `FROM <image name>`<br>
-It specifies the base layer of the image to be used. Every other instruction is a layer on top of that base image.
+Using a Service.
 </b></details>
 
 <details>
-<summary>List five different instructions that are available for use in a Dockerfile</summary><br><b>
+<summary>An internal load balancer in Kubernetes is called <code>____</code> and an external load balancer is called <code>____</code></summary><br><b>
 
-  * WORKDIR: sets the working directory inside the image filesystems for all the instructions following it
-  * EXPOSE: exposes the specified port (it doesn't adds a new layer, rather documented as image metadata)
-  * ENTRYPOINT: specifies the startup commands to run when a container is started from the image
-  * ENV: sets an environment variable to the given value
-  * USER: sets the user (and optionally the user group) to use while running the image
+An internal load balancer in Kubernetes is called Service and an external load balancer is Ingress
+</b></details>
+
+<a name="kubernetes-services"></a>
+#### Kubernetes - Services
+
+<details>
+<summary>What is a Service in Kubernetes?</summary><br><b>
+
+"An abstract way to expose an application running on a set of Pods as a network service." - read more [here](https://kubernetes.io/docs/concepts/services-networking/service)<br>
+In simpler words, it allows you to add an internal or external connectivity to a certain application running in a container.
 </b></details>
 
 <details>
-<summary>What are some of the best practices regarding container images and Dockerfiles that you are following?</summary><br><b>
-
-  * Include only the packages you are going to use. Nothing else.
-  * Specify a tag in FROM instruction. Not using a tag means you'll always pull the latest, which changes over time and might result in unexpected result.
-  * Do not use environment variables to share secrets
-  * Use images from official repositories
-  * Keep images small! - you want them only to include what is required for the application to run successfully. Nothing else.
-  * If are using the apt package manager, you might use 'no-install-recommends' with `apt-get install` to install only main dependencies (instead of suggested, recommended packages)
-</b></details>
-
-<details>
-<summary>What is the "build context"?</summary><br><b>
-
-[Docker docs](https://docs.docker.com/engine/reference/commandline/build): "A build’s context is the set of files located in the specified PATH or URL"
-</b></details>
-
-<details>
-<summary>What is the difference between ADD and COPY in Dockerfile?</summary><br><b>
-
-COPY takes in a source and destination. It lets you copy in a file or directory from the build context into the Docker image itself.<br>
-ADD lets you do the same, but it also supports two other sources. You can use a URL instead of a file or directory from the build context. In addition, you can extract a tar file from the source directly into the destination.
-
-Although ADD and COPY are functionally similar, generally speaking, COPY is preferred. That’s because it’s more transparent than ADD. COPY only supports the basic copying of files from build context into the container, while ADD has some features (like local-only tar extraction and remote URL support) that are not immediately obvious.
-</b></details>
-
-<details>
-<summary>What is the difference between CMD and RUN in Dockerfile?</summary><br><b>
-
-RUN lets you execute commands inside of your Docker image. These commands get executed once at build time and get written into your Docker image as a new layer.
-CMD is the command the container executes by default when you launch the built image. A Dockerfile can only have one CMD.
-You could say that CMD is a Docker run-time operation, meaning it’s not something that gets executed at build time. It happens when you run an image. A running image is called a container.
-</b></details>
-
-<details>
-<summary>How to create a new image using a Dockerfile?</summary><br><b>
-
-The following command is executed from within the directory where Dockefile resides:
-
-`docker image build -t some_app:latest .`
-`podman image build -t some_app:latest .`
-</b></details>
-
-<details>
-<summary>Do you perform any checks or testing on your Dockerfiles?</summary><br><b>
-
-One option is to use [hadolint](https://github.com/hadolint/hadolint) project which is a linter based on Dockerfile best practices.
-</b></details>
-
-<details>
-<summary>Which instructions in Dockerfile create new layers?</summary><br><b>
-
-Instructions such as FROM, COPY and RUN, create new image layers instead of just adding metadata.
-</b></details>
-
-<details>
-<summary>Which instructions in Dockerfile create image metadata and don't create new layers?</summary><br><b>
-
-Instructions such as ENTRYPOINT, ENV, EXPOSE, create image metadata and they don't create new layers.
-</b></details>
-
-<details>
-<summary>Is it possible to identify which instruction create a new layer from the output of <code>docker image history</code>?</summary><br><b>
-</b></details>
-
-<a name="questions-architecture"></a>
-#### Containers - Architecture
-
-<details>
-<summary>How container achieve isolation from the rest of the system?</summary><br><b>
-
-Through the use of namespaces and cgroups. Linux kernel has several types of namespaces:
-
-  - Process ID namespaces: these namespaces include independent set of process IDs
-  - Mount namespaces: Isolation and control of mountpoints
-  - Network namespaces: Isolates system networking resources such as routing table, interfaces, ARP table, etc.
-  - UTS namespaces: Isolate host and domains
-  - IPC namespaces: Isolates interprocess communications
-  - User namespaces: Isolate user and group IDs
-  - Time namespaces: Isolates time machine
-</b></details>
-
-<details>
-<summary>What Linux kernel features does containers use?</summary><br><b>
-
-* cgroups (Control Groups): used for limiting the amount of resources a certain groups of processes (and their children of course) use. This way, a group of processes isn't consuming all host resources and other groups can run and use part of the resources as well
-
-* namespaces: same as cgroups, namespaces isolate some of the system resources so it's available only for processes in the namespace. Differently from cgroups the focus with namespaces is on resources like mount points, IPC, network, ... and not about memory and CPU as in cgroups
-
-* SElinux: the access control mechanism used to protect processes. Unfortunately to this date many users don't actually understand SElinux and some turn it off but nontheless, it's a very important security feature of the Linux kernel, used by container as well
-
-* Seccomp: similarly to SElinux, it's also a security mechanism, but its focus is on limiting the processes in regards to using system calls and file descriptors
-</b></details>
-
-<details>
-<summary>Describe in detail what happens when you run `podman/docker run hello-world`?</summary><br><b>
-
-Docker/Podman CLI passes your request to Docker daemon.
-Docker/Podman daemon downloads the image from Docker Hub
-Docker/Podman daemon creates a new container by using the image it downloaded
-Docker/Podman daemon redirects output from container to Docker CLI which redirects it to the standard output
-</b></details>
-
-<details>
-<summary>Describe difference between cgroups and namespaces</summary><br><b>
-cgroup: Control Groups provide a mechanism for aggregating/partitioning sets of tasks, and all their future children, into hierarchical groups with specialized behavior.
-namespace: wraps a global system resource in an abstraction that makes it appear to the processes within the namespace that they have their own isolated instance of the global resource.
-
-In short:
-
-Cgroups = limits how much you can use;
-namespaces = limits what you can see (and therefore use)
-
-Cgroups involve resource metering and limiting:
-memory
-CPU
-block I/O
-network
-
-Namespaces provide processes with their own view of the system
-
-Multiple namespaces: pid,net, mnt, uts, ipc, user
-
-</b></details>
-
-<details>
-<summary>Which of the following are Linux features that containers use?
-
-* cspaces
-* namegroups
-* namespaces
-* cgroups
-* ELlinux
-* SElinux</summary><br><b>
-
-* namespaces
-* cgroups
-* SElinux
-</b></details>
-
-<a name="questions-docker-architecture"></a>
-#### Containers - Docker Architecture
-
-<details>
-<summary>Which components/layers compose the Docker technology?</summary><br><b>
-
-1. Runtime - responsible for starting and stopping containers
-2. Daemon - implements the Docker API and takes care of managing images (including builds), authentication, security, networking, etc.
-3. Orchestrator
-</b></details>
-
-<details>
-<summary>What components are part of the Docker engine?</summary><br><b>
-
-  - Docker daemon
-  - containerd
-  - runc
-</b></details>
-
-<details>
-<summary>What is the low-level runtime?</summary><br><b>
-
-  - The low level runtime is called runc
-  - It manages every container running on Docker host
-  - Its purpose is to interact with the underlying OS to start and stop containers
-  - Its reference implementation is of the OCI (Open Containers Initiative) container-runtime-spec
-  - It's a small CLI wrapper for libcontainer
-</b></details>
-
-<details>
-<summary>What is the high-level runtime?</summary><br><b>
-
-  - The high level runtime is called containerd
-  - It was developed by Docker Inc and at some point donated to CNCF
-  - It manages the whole lifecycle of a container - start, stop, remove and pause
-  - It take care of setting up network interfaces, volume, pushing and pulling images, ...
-  - It manages the lower level runtime (runc) instances
-  - It's used both by Docker and Kubernetes as a container runtime
-  - It sits between Docker daemon and runc at the OCI layer
-
-Note: running `ps -ef | grep -i containerd` on a system with Docker installed and running, you should see a process of containerd
-</b></details>
-
-<details>
-<summary>True or False? The docker daemon (dockerd) performs lower-level tasks compared to containerd</summary><br><b>
-
-False. The Docker daemon performs higher-level tasks compared to containerd.<br>
-It's responsible for managing networks, volumes, images, ...
-</b></details>
-
-<details>
-<summary>Describe in detail what happens when you run `docker pull image:tag`?</summary><br><b>
-Docker CLI passes your request to Docker daemon. Dockerd Logs shows the process
-
-docker.io/library/busybox:latest resolved to a manifestList object with 9 entries; looking for a unknown/amd64 match
-
-found match for linux/amd64 with media type application/vnd.docker.distribution.manifest.v2+json, digest sha256:400ee2ed939df769d4681023810d2e4fb9479b8401d97003c710d0e20f7c49c6
-
-pulling blob \"sha256:61c5ed1cbdf8e801f3b73d906c61261ad916b2532d6756e7c4fbcacb975299fb Downloaded 61c5ed1cbdf8 to tempfile /var/lib/docker/tmp/GetImageBlob909736690
-
-Applying tar in /var/lib/docker/overlay2/507df36fe373108f19df4b22a07d10de7800f33c9613acb139827ba2645444f7/diff" storage-driver=overlay2
-
-Applied tar sha256:514c3a3e64d4ebf15f482c9e8909d130bcd53bcc452f0225b0a04744de7b8c43 to 507df36fe373108f19df4b22a07d10de7800f33c9613acb139827ba2645444f7, size: 1223534
-</b></details>
-
-<details>
-<summary>Describe in detail what happens when you run a container</summary><br><b>
-
-1. The Docker client converts the run command into an API payload
-2. It then POST the payload to the API endpoint exposed by the Docker daemon
-3. When the daemon receives the command to create a new container, it makes a call to containerd via gRPC
-4. containerd converts the required image into an OCI bundle and tells runc to use that bundle for creating the container
-5. runc interfaces with the OS kernel to pull together the different constructs (namespace, cgroups, etc.) used for creating the container
-6. Container process is started as a child-process of runc
-7. Once it starts, runc exists
-</b></details>
-
-<details>
-<summary>True or False? Killing the Docker daemon will kill all the running containers</summary><br><b>
-
-False. While this was true at some point, today the container runtime isn't part of the daemon (it's part of containerd and runc) so stopping or killing the daemon will not affect running containers.
-</b></details>
-
-<details>
-<summary>True or False? containerd forks a new instance runc for every container it creates</summary><br><b>
+<summary>True or False? The lifecycle of Pods and Services isn't connected so when a Pod dies, the Service still stays </summary><br><b>
 
 True
 </b></details>
 
 <details>
-<summary>True or False? Running a dozen of containers will result in having a dozen of runc processes</summary><br><b>
+<summary>What Service types are there?</summary><br><b>
 
-False. Once a container is created, the parent runc process exists.
+* ClusterIP
+* NodePort
+* LoadBalancer
+* ExternalName
+
+More on this topic [here](https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types)
 </b></details>
 
 <details>
-<summary>What is shim in regards to Docker?</summary><br><b>
+<summary>How Service and Deployment are connected?</summary><br><b>
 
-shim is the process that becomes the container's parent when runc process exists. It's responsible for:
-
-  - Reporting exit code back to the Docker daemon
-  - Making sure the container doesn't terminate if the daemon is being restarted. It does so by keeping the stdout and stdin open
+The truth is they aren't connected. Service points to Pod(s) directly, without connecting to the Deployment in any way.
 </b></details>
 
 <details>
-<summary>What `podman commit` does?. When will you use it?</summary><br><b>
+<summary>What are important steps in defining/adding a Service?</summary><br><b>
 
-Create a new image from a container’s changes
+1. Making sure that targetPort of the Service is matching the containerPort of the POd
+2. Making sure that selector matches at least one of the Pod's labels
 </b></details>
 
 <details>
-<summary>How would you transfer data from one container into another?</summary><br><b>
+<summary>What is the default service type in Kubernetes and what is it used for?</summary><br><b>
+
+The default is ClusterIP and it's used for exposing a port internally. It's useful when you want to enable internal communication between Pods and prevent any external access.
 </b></details>
 
 <details>
-<summary>What happens to data of the container when a container exists?</summary><br><b>
+<summary>How to get information on a certain service?</summary><br><b>
+
+`kubctl describe service <SERVICE_NAME>`
+
+It's more common to use `kubectl describe svc ...`
 </b></details>
 
 <details>
-<summary>Explain what each of the following commands do:
+<summary>What the following command does?
 
-  * docker run
-  * docker rm
-  * docker ps
-  * docker pull
-  * docker build
-  * docker commit
+```
+kubectl expose rs some-replicaset --name=replicaset-svc --target-port=2017 --type=NodePort
+```
 </summary><br><b>
+
+It exposes a ReplicaSet by creating a service called 'replicaset-svc'. The exposed port is 2017 (this is the port used by the application) and the service type is NodePort which means it will be reachable externally.
 </b></details>
 
 <details>
-<summary>How do you remove old, non running, containers?</summary><br><b>
+<summary>True or False? the target port, in the case of running the following command, will be exposed only on one of the Kubernetes cluster nodes but it will routed to all the pods
 
-1. To remove one or more Docker images use the docker container rm command followed by the ID of the containers you want to remove.
-2. The docker system prune command will remove all stopped containers, all dangling images, and all unused networks
-3. docker rm $(docker ps -a -q) - This command will delete all stopped containers. The command docker ps -a -q will return all existing container IDs and pass them to the rm command which will delete them. Any running containers will not be deleted.
+```
+kubectl expose rs some-replicaset --name=replicaset-svc --target-port=2017 --type=NodePort
+```
+</summary><br><b>
+
+False. It will be exposed on every node of the cluster and will be routed to one of the Pods (which belong to the ReplicaSet)
 </b></details>
 
 <details>
-<summary>How the Docker client communicates with the daemon?</summary><br><b>
+<summary>How to verify that a certain service configured to forward the requests to a given pod</summary><br><b>
 
-Via the local socket at `/var/run/docker.sock`
+Run `kubectl describe service` and see if the IPs from "Endpoints" match any IPs from the output of `kubectl get pod -o wide`
 </b></details>
 
 <details>
-<summary>Explain Docker interlock</summary><br><b>
+<summary>Explain what will happen when running apply on the following block
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: some-app
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    nodePort: 2017
+    protocol: TCP
+  selector:
+    type: backend
+    service: some-app
+```
+</summary><br><b>
+
+It creates a new Service of the type "NodePort" which means it can be used for internal and external communication with the app.<br>
+The port of the application is 8080 and the requests will forwarded to this port. The exposed port is 2017. As a note, this is not a common practice, to specify the nodePort.<br>
+The port used TCP (instead of UDP) and this is also the default so you don't have to specify it.<br>
+The selector used by the Service to know to which Pods to forward the requests. In this case, Pods with the label "type: backend" and "service: some-app".<br>
 </b></details>
 
 <details>
-<summary>What is Docker Repository?</summary><br><b>
+<summary>How to turn the following service into an external one?
+
+```
+spec:
+  selector:
+    app: some-app
+  ports:
+    - protocol: TCP
+      port: 8081
+      targetPort: 8081
+```
+</summary><br><b>
+
+Adding `type: LoadBalancer` and `nodePort`
+
+```
+spec:
+  selector:
+    app: some-app
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 8081
+      targetPort: 8081
+      nodePort: 32412
+```
 </b></details>
 
 <details>
-<summary>Explain image layers</summary><br><b>
+<summary>What would you use to route traffic from outside the Kubernetes cluster to services within a cluster?</summary><br><b>
 
-A Docker image is built up from a series of layers. Each layer represents an instruction in the image’s Dockerfile. Each layer except the very last one is read-only.
-Each layer is only a set of differences from the layer before it. The layers are stacked on top of each other. When you create a new container, you add a new writable layer on top of the underlying layers. This layer is often called the “container layer”. All changes made to the running container, such as writing new files, modifying existing files, and deleting files, are written to this thin writable container layer.
-The major difference between a container and an image is the top writable layer. All writes to the container that add new or modify existing data are stored in this writable layer. When the container is deleted, the writable layer is also deleted. The underlying image remains unchanged.
-Because each container has its own writable container layer, and all changes are stored in this container layer, multiple containers can share access to the same underlying image and yet have their own data state.
+Ingress
 </b></details>
 
 <details>
-<summary>What best practices are you familiar related to working with containers?</summary><br><b>
+<summary>True or False? When "NodePort" is used, "ClusterIP" will be created automatically?</summary><br><b>
+
+True
 </b></details>
 
 <details>
-<summary>How do you manage persistent storage in Docker?</summary><br><b>
+<summary>When would you use the "LoadBalancer" type</summary><br><b>
+
+Mostly when you would like to combine it with cloud provider's load balancer
 </b></details>
 
 <details>
-<summary>How can you connect from the inside of your container to the localhost of your host, where the container runs?</summary><br><b>
+<summary>How would you map a service to an external address?</summary><br><b>
+
+Using the 'ExternalName' directive.
 </b></details>
 
 <details>
-<summary>How do you copy files from Docker container to the host and vice versa?</summary><br><b>
-</b></details>
+<summary>Describe in detail what happens when you create a service</summary><br><b>
 
-<a name="questions-docker-compose"></a>
-#### Containers - Docker Compose
-
-<details>
-<summary>Explain what is Docker compose and what is it used for</summary><br><b>
-
-Compose is a tool for defining and running multi-container Docker applications. With Compose, you use a YAML file to configure your application’s services. Then, with a single command, you create and start all the services from your configuration.
-
-For example, you can use it to set up ELK stack where the services are: elasticsearch, logstash and kibana. Each running in its own container.<br>
-In general, it's useful for running applications which composed out of several different services. It let's you manage it as one deployed app, instead of different multiple separate services.
+1. Kubectl sends a request to the API server to create a Service
+2. The controller detects there is a new Service
+3. Endpoint objects created with the same name as the service, by the controller
+4. The controller is using the Service selector to identify the endpoints
+5. kube-proxy detects there is a new endpoint object + new service and adds iptables rules to capture traffic to the Service port and redirect it to endpoints
+6. kube-dns detects there is a new Service and adds the container record to the dns server
 </b></details>
 
 <details>
-<summary>Describe the process of using Docker Compose</summary><br><br>
+<summary>How to list the endpoints of a certain app?</summary><br><b>
 
-* Define the services you would like to run together in a docker-compose.yml file
-* Run `docker-compose up` to run the services
-</b></details>
-
-<a name="questions-docker-images"></a>
-#### Containers - Docker Images
-
-<details>
-<summary>What is Docker Hub?</summary><br><b>
-
-One of the most common registries for retrieving images.
+`kubectl get ep <name>`
 </b></details>
 
 <details>
-<summary>How to push an image to Docker Hub?</summary><br><b>
+<summary>How can you find out information on a Service related to a certain Pod if all you can use is <code>kubectl exec <POD_NAME> -- </code></summary><br><b>
 
-`docker image push [username]/[image name]:[tag]`
-
-For example:
-
-`docker image mario/web_app:latest`
+You can run `kubectl exec <POD_NAME> -- env` which will give you a couple environment variables related to the Service.<br>
+Variables such as `[SERVICE_NAME]_SERVICE_HOST`, `[SERVICE_NAME]_SERVICE_PORT`, ...
 </b></details>
 
 <details>
-<summary>What is the difference between Docker Hub and Docker cloud?</summary><br><b>
+<summary>Describe what happens when a container tries to connect with its corresponding Service for the first time. Explain who added each of the components you include in your description</summary><br><b>
 
-Docker Hub is a native Docker registry service which allows you to run pull
-and push commands to install and deploy Docker images from the Docker Hub.
+  - The container looks at the nameserver defined in /etc/resolv.conf
+  - The container queries the nameserver so the address is resolved to the Service IP
+  - Requests sent to the Service IP are forwarded with iptables rules (or other chosen software) to the endpoint(s).
 
-Docker Cloud is built on top of the Docker Hub so Docker Cloud provides
-you with more options/features compared to Docker Hub. One example is
-Swarm management which means you can create new swarms in Docker Cloud.
+Explanation as to who added them:
+
+  - The nameserver in the container is added by kubelet during the scheduling of the Pod, by using kube-dns
+  - The DNS record of the service is added by kube-dns during the Service creation
+  - iptables rules are added by kube-proxy during Endpoint and Service creation
+</b></details>
+
+#### Kubernetes - Ingress
+
+<details>
+<summary>What is Ingress?</summary><br><b>
+
+From Kubernetes docs: "Ingress exposes HTTP and HTTPS routes from outside the cluster to services within the cluster. Traffic routing is controlled by rules defined on the Ingress resource."
+
+Read more [here](https://kubernetes.io/docs/concepts/services-networking/ingress/)
 </b></details>
 
 <details>
-<summary>Explain Multi-stage builds</summary><br><b>
+<summary>Complete the following configuration file to make it Ingress
 
-Multi-stages builds allow you to produce smaller container images by splitting the build process into multiple stages.
+```
+metadata:
+  name: someapp-ingress
+spec:
+```
+</summary><br><b>
+There are several ways to answer this question.
 
-As an example, imagine you have one Dockerfile where you first build the application and then run it. The whole build process of the application might be using packages and libraries you don't really need for running the application later. Moreover, the build process might produce different artifacts which not all are needed for running the application.
+```
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: someapp-ingress
+spec:
+  rules:
+  - host: my.host
+    http:
+      paths:
+      - backend:
+          serviceName: someapp-internal-service
+          servicePort: 8080
+```
+</b></details>
 
-How do you deal with that? Sure, one option is to add more instructions to remove all the unnecessary stuff but, there are a couple of issues with this approach:
-1. You need to know what to remove exactly and that might be not as straightforward as you think
-2. You add new layers which are not really needed
 
-A better solution might be to use multi-stage builds where one stage (the build process) is passing the relevant artifacts/outputs to the stage that runs the application.
+<details>
+<summary>Explain the meaning of "http", "host" and "backend" directives
+
+```
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: someapp-ingress
+spec:
+  rules:
+  - host: my.host
+    http:
+      paths:
+      - backend:
+          serviceName: someapp-internal-service
+          servicePort: 8080
+```
+</summary><br><b>
+
+host is the entry point of the cluster so basically a valid domain address that maps to cluster's node IP address<br>
+the http line used for specifying that incoming requests will be forwarded to the internal service using http.<br>
+backend is referencing the internal service (serviceName is the name under metadata and servicePort is the port under the ports section).
 </b></details>
 
 <details>
-<summary>True or False? In multi-stage builds, artifacts can be copied between stages</summary><br><b>
+<summary>Why using a wildcard in ingress host may lead to issues?</summary><br><b>
 
-True. This allows us to eventually produce smaller images.
+The reason you should not wildcard value in a host (like `- host: *`) is because you basically tell your Kubernetes cluster to forward all the traffic to the container where you used this ingress. This may cause the entire cluster to go down.
 </b></details>
 
 <details>
-<summary>What <code>.dockerignore</code> is used for?</summary><br><b>
+<summary>What is Ingress Controller?</summary><br><b>
 
-By default, Docker uses everything (all the files and directories) in the directory you use as build context.<br>
-`.dockerignore` used for excluding files and directories from the build context
-</b></details>
+An implementation for Ingress. It's basically another pod (or set of pods) that does evaluates and processes Ingress rules and this it manages all the redirections. 
 
-<a name="questions-networking"></a>
-#### Containers - Networking
-
-<details>
-<summary>What container network standards or architectures are you familiar with?</summary><br><b>
-
-CNM (Container Network Model):
-  * Requires distrubited key value store (like etcd for example) for storing the network configuration
-  * Used by Docker
-CNI (Container Network Interface):
-  * Network configuration should be in JSON format
-</b></details>
-
-<a name="questions-docker-networking"></a>
-#### Containers - Docker Networking
-
-<details>
-<summary>What network specification Docker is using and how its implementation is called?</summary><br><b>
-
-Docker is using the CNM (Container Network Model) design specification.<br>
-The implementation of CNM specification by Docker is called "libnetwork". It's written in Go.
+There are multiple Ingress Controller implementations (the one from Kubernetes is Kubernetes Nginx Ingress Controller).
 </b></details>
 
 <details>
-<summary>Explain the following blocks in regards to CNM:
+<summary>What are some use cases for using Ingress?</summary><br><b>
 
-  * Networks 
-  * Endpoints
-  * Sandboxes</summary><br><b>
-
-  * Networks: software implementation of an switch. They used for grouping and isolating a collection of endpoints.
-  * Endpoints: Virtual network interfaces. Used for making connections.
-  * Sandboxes: Isolated network stack (interfaces, routing tables, ports, ...)
+* Multiple sub-domains (multiple host entries, each with its own service)
+* One domain with multiple services (multiple paths where each one is mapped to a different service/application)
 </b></details>
 
 <details>
-<summary>True or False? If you would like to connect a container to multiple networks, you need multiple endpoints</summary><br><b>
+<summary>How to list Ingress in your namespace?</summary><br><b>
 
-True. An endpoint can connect only to a single network.
+kubectl get ingress
 </b></details>
 
 <details>
-<summary>What are some features of libnetwork?</summary><br><b>
+<summary>What is Ingress Default Backend?</summary><br><b>
 
-* Native service discovery
-* ingress-based load balancer
-* network control plane and management plane
-</b></details>
-
-<a name="questions-security"></a>
-#### Containers - Security
-
-<details>
-<summary>What security best practices are there regarding containers?</summary><br><b>
-
-  * Install only the necessary packages in the container
-  * Don't run containers as root when possible
-  * Don't mount the Docker daemon unix socket into any of the containers
-  * Set volumes and container's filesystem to read only
-  * DO NOT run containers with `--privilged` flag
+It specifies what do with an incoming request to the Kubernetes cluster that isn't mapped to any backend (= no rule to for mapping the request to a service). If the default backend service isn't defined, it's recommended to define so users still see some kind of message instead of nothing or unclear error.
 </b></details>
 
 <details>
-<summary>A container can cause a kernel panic and bring down the whole host. What preventive actions can you apply to avoid this specific situation?</summary><br><b>
+<summary>How to configure a default backend?</summary><br><b>
 
-  * Install only the necessary packages in the container
-  * Set volumes and container's filesystem to read only
-  * DO NOT run containers with `--privilged` flag
-</b></details>
-
-<a name="questions-docker-in-production"></a>
-#### Containers - Docker in Production
-
-<details>
-<summary>What are some best practices you following in regards to using containers in production?</summary><br><b>
-
-Images:
-  * Use images from official repositories
-  * Include only the packages you are going to use. Nothing else.
-  * Specify a tag in FROM instruction. Not using a tag means you'll always pull the latest, which changes over time and might result in unexpected result.
-  * Do not use environment variables to share secrets
-  * Keep images small! - you want them only to include what is required for the application to run successfully. Nothing else.
-Components:
-  * Secured connection between components (e.g. client and server)
+Create Service resource that specifies the name of the default backend as reflected in `kubectl describe ingress ...` and the port under the ports section.
 </b></details>
 
 <details>
-<summary>True or False? It's recommended for production environments that Docker client and server will communicate over network using HTTP socket</summary><br><b>
+<summary>How to configure TLS with Ingress?</summary><br><b>
 
-False. Communication between client and server shouldn't be done over HTTP since it's insecure. It's better to enforce the daemon to only accept network connection that are secured with TLS.<br>
-Basically, the Docker daemon will only accept secured connections with certificates from trusted CA.
+Add tls and secretName entries.
+
+```
+spec:
+  tls:
+  - hosts:
+    - some_app.com
+    secretName: someapp-secret-tls
+````
 </b></details>
 
 <details>
-<summary>What forms of self-healing options available for Docker containers?</summary><br><b>
+<summary>True or False? When configuring Ingress with TLS, the Secret component must be in the same namespace as the Ingress component</summary><br><b>
 
-Restart Policies. It allows you to automatically restart containers after certain events.
+True
 </b></details>
 
 <details>
-<summary>What restart policies are you familiar with?</summary><br><b>
+<summary>Which Kubernetes concept would you use to control traffic flow at the IP address or port level? </summary><br><b>
 
-  * always: restart the container when it's stopped (not with `docker container stop`)
-  * unless-stopped: restart the container unless it was in stopped status
-  * no: don't restart the container at any point (default policy)
-  * on-failure: restart the container when it exists due to an error (= exit code different than zero)
+Network Policies
+</b></details>
+
+<details>
+<summary>What the following block of lines does?
+
+```
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      type: backend
+  template:
+    metadata:
+      labels:
+        type: backend
+    spec:
+      containers:
+      - name: httpd-yup
+        image: httpd
+```
+</summary><br><b>
+
+It defines a replicaset for Pods whose type is set to "backend" so at any given point of time there will be 2 concurrent Pods running.
+</b></details>
+
+#### Kubernetes - ReplicaSets
+
+<details>
+<summary>What is the purpose of ReplicaSet?</summary><br><b>
+
+[kubernetes.io](https://kubernetes.io/docs/concepts/workloads/controllers/replicaset): "A ReplicaSet's purpose is to maintain a stable set of replica Pods running at any given time. As such, it is often used to guarantee the availability of a specified number of identical Pods."
+
+In simpler words, a ReplicaSet will ensure the specified number of Pods replicas is running for a selected Pod. If there are more Pods than defined in the ReplicaSet, some will be removed. If there are less than what is defined in the ReplicaSet then, then more replicas will be added.
+</b></details>
+
+<details>
+<summary>What will happen when a Pod, created by ReplicaSet, is deleted directly with <code>kubectl delete po ...</code>?</summary><br><b>
+
+The ReplicaSet will create a new Pod in order to reach the desired number of replicas.
+</b></details>
+
+<details>
+<summary>True or False? If a ReplicaSet defines 2 replicas but there 3 Pods running matching the ReplicaSet selector, it will do nothing</summary><br><b>
+
+False. It will terminate one of the Pods to reach the desired state of 2 replicas.
+</b></details>
+
+<details>
+<summary>Describe the sequence of events in case of creating a ReplicaSet</summary><br><b>
+
+* The client (e.g. kubectl) sends a request to the API server to create a ReplicaSet
+* The Controller detects there is a new event requesting for a ReplicaSet
+* The controller creates new Pod definitions (the exact number depends on what is defined in the ReplicaSet definition)
+* The scheduler detects unassigned Pods and decides to which nodes to assign the Pods. This information sent to the API server
+* Kubelet detects that two Pods were assigned to the node it's running on (as it constantly watching the API server)
+* Kubelet sends requests to the container engine, to create the containers that are part of the Pod
+* Kubelet sends a request to the API server to notify it the Pods were created
+</b></details>
+
+<details>
+<summary>How to list ReplicaSets in the current namespace?</summary><br><b>
+
+kubectl get rs
+</b></details>
+
+<details>
+<summary>Is it possible to delete ReplicaSet without deleting the Pods it created?</summary><br><b>
+
+Yes, with `--cascase=false`.
+
+`kubectl delete -f rs.yaml --cascade=false`
+</b></details>
+
+<details>
+<summary>What is the default number of replicas if not explicitly specified?</summary><br><b>
+
+1
+</b></details>
+
+<details>
+<summary>What the following output of <code>kubectl get rs</code> means?
+
+NAME                    DESIRED   CURRENT   READY   AGE
+web                     2         2         0       2m23s
+</summary><br><b>
+
+The replicaset `web` has 2 replicas. It seems that the containers inside the Pod(s) are not yet running since the value of READY is 0. It might be normal since it takes time for some containers to start running and it might be due to an error. Running `kubectl describe po POD_NAME` or `kubectl logs POD_NAME` can give us more information.
+</b></details>
+
+<details>
+<summary>You run <code>kubectl get rs</code> and while DESIRED is set to 2, you see that READY is set to 0. What are some possible reasons for it to be 0?</summary><br><b>
+
+  * Images are still being pulled
+  * There is an error and the containers can't reach the state "Running"
+</b></details>
+
+<details>
+<summary>True or False? Pods specified by the selector field of ReplicaSet must be created by the ReplicaSet itself</summary><br><b>
+
+False. The Pods can be already running and initially they can be created by any object. It doesn't matter for the ReplicaSet and not a requirement for it to acquire and monitor them.
+</b></details>
+
+<details>
+<summary>True or False? In case of a ReplicaSet, if Pods specified in the selector field don't exists, the ReplicaSet will wait for them to run before doing anything</summary><br><b>
+
+False. It will take care of running the missing Pods.
+</b></details>
+
+<details>
+<summary>In case of a ReplicaSet, Which field is mandatory in the spec section?</summary><br><b>
+
+The field `template` in spec section is mandatory. It's used by the ReplicaSet to create new Pods when needed.
+</b></details>
+
+<details>
+<summary>You've created a ReplicaSet, how to check whether the ReplicaSet found matching Pods or it created new Pods?</summary><br><b>
+
+`kubectl describe rs <ReplicaSet Name>`
+
+It will be visible under `Events` (the very last lines)
+</b></details>
+
+<details>
+<summary>True or False? Deleting a ReplicaSet will delete the Pods it created</summary><br><b>
+
+True (and not only the Pods but anything else it created).
+</b></details>
+
+<details>
+<summary>True or False? Removing the label from a Pod that is used by ReplicaSet to match Pods, will cause the ReplicaSet to create a new Pod</summary><br><b>
+
+True. When the label, used by a ReplicaSet in the selector field, removed from a Pod, that Pod no longer controlled by the ReplicaSet and the ReplicaSet will create a new Pod to compensate for the one it "lost".
+</b></details>
+
+<details>
+<summary>How to scale a deployment to 8 replicas?</code></summary><br><b>
+
+kubectl scale deploy <DEPLOYMENT_NAME> --replicas=8
+</b></details>
+
+<details>
+<summary>ReplicaSets are running the moment the user executed the command to create them (like <code>kubectl create -f rs.yaml</code>)</summary><br><b>
+
+False. It can take some time, depends on what exactly you are running. To see if they are up and running, run `kubectl get rs` and watch the 'READY' column.
+</b></details>
+
+<details>
+<summary>How to expose a ReplicaSet as a new service?</summary><br><b>
+
+`kubectl expose rs <ReplicaSet Name> --name=<Service Name> --target-port=<Port to expose> --type=NodePort`
+
+Few notes:
+  - the target port depends on which port the app is using in the container
+  - type can be different and doesn't has to be specifically "NodePort"
+</b></details>
+
+<details>
+<summary>What's the diffence between a ReplicaSet and DaemonSet?</summary><br><b>
+
+A ReplicaSet's purpose is to maintain a stable set of replica Pods running at any given time.
+A DaemonSet ensures that all Nodes run a copy of a Pod. 
+</b></details>  
+
+#### Kubernetes - Storage
+
+<details>
+<summary>What is a volume in regards to Kubernetes?</summary><br><b>
+
+A directory accessible by the containers inside a certain Pod. The mechanism responsible for creating the directory and managing it, ... is mainly depends on the volume type.
+</b></details>
+
+<details>
+<summary>Which problems volumes in Kubernetes solve?</summary><br><b>
+
+1. Sharing files between containers running in the same Pod
+2. Storage in containers is ephemeral - it usually doesn't last for long. For example, when a container crashes, you lose all on-disk data.
+</b></details>
+
+<details>
+<summary>Explain ephemeral volume types vs. persistent volumes in regards to Pods</summary><br><b>
+
+Ephemeral volume types have the lifetime of a pod as opposed to persistent volumes which exist beyond the lifetime of a Pod.
+</b></details>
+
+#### Kubernetes - Network Policies
+
+<details>
+<summary>Explain Network Policies</summary><br><b>
+
+[kubernetes.io](https://kubernetes.io/docs/concepts/services-networking/network-policies): "NetworkPolicies are an application-centric construct which allow you to specify how a pod is allowed to communicate with various network "entities"..."
+
+In simpler words, Network Policies specify how pods are allowed/disallowed to communicate with each other and/or other network endpoints.
+</b></details>
+
+<details>
+<summary>What are some use cases for using Network Policies?</summary><br><b>
+
+  - Security:  You want to prevent from everyone to communicate with a certain pod for security reasons
+  - Controlling network traffic: You would like to deny network flow between two specific nodes
+</b></details>
+
+<details>
+<summary>True or False? If no network policies are applied to a pod, then no connections to or from it are allowed</summary><br><b>
+
+False. By default pods are non-isolated.
+</b></details>
+
+<details>
+<summary>In case of two pods, if there is an egress policy on the source denining traffic and ingress policy on the destination that allows traffic then, traffic will be allowed or denied?</summary><br><b>
+
+Denied. Both source and destination policies has to allow traffic for it to be allowed.
+</b></details>
+
+#### Kubernetes - Configuration File
+
+<details>
+<summary>Which parts a configuration file has?</summary><br><b>
+
+It has three main parts:
+1. Metadata
+2. Specification
+3. Status (this automatically generated and added by Kubernetes)
+</b></details>
+
+<details>
+<summary>What is the format of a configuration file?</summary><br><b>
+
+YAML
+</b></details>
+
+<details>
+<summary>How to get latest configuration of a deployment?</summary><br><b>
+
+`kubectl get deployment [deployment_name] -o yaml`
+</b></details>
+
+<details>
+<summary>Where Kubernetes cluster stores the cluster state?</summary><br><b>
+
+etcd
+</b></details>
+
+#### Kubernetes - etcd
+
+<details>
+<summary>What is etcd?</summary><br><b>
+  etcd is an open source distributed key-value store used to hold and manage the critical information that distributed systems need to keep running.[Read more](https://www.redhat.com/en/topics/containers/what-is-etcd)
+</b></details>
+
+<details>
+<summary>True or False? Etcd holds the current status of any kubernetes component</summary><br><b>
+
+True
+</b></details>
+
+<details>
+<summary>True or False? The API server is the only component which communicates directly with etcd</summary><br><b>
+
+True
+</b></details>
+
+<details>
+<summary>True or False? application data is not stored in etcd</summary><br><b>
+
+True
+</b></details>
+
+<details>
+<summary>Why etcd? Why not some SQL or NoSQL database?</summary><br><b>
+</b></details>
+
+#### Kubernetes - Namespaces
+
+<details>
+<summary>What are namespaces?</summary><br><b>
+
+Namespaces allow you split your cluster into virtual clusters where you can group your applications in a way that makes sense and is completely separated from the other groups (so you can for example create an app with the same name in two different namespaces)
+</b></details>
+
+<a name="namespaces-use-cases"></a>
+<details>
+<summary>Why to use namespaces? What is the problem with using one default namespace?</summary><br><b>
+
+When using the default namespace alone, it becomes hard over time to get an overview of all the applications you manage in your cluster. Namespaces make it easier to organize the applications into groups that makes sense, like a namespace of all the monitoring applications and a namespace for all the security applications, etc.
+
+Namespaces can also be useful for managing Blue/Green environments where each namespace can include a different version of an app and also share resources that are in other namespaces (namespaces like logging, monitoring, etc.).
+
+Another use case for namespaces is one cluster, multiple teams. When multiple teams use the same cluster, they might end up stepping on each others toes. For example if they end up creating an app with the same name it means one of the teams overridden the app of the other team because there can't be too apps in Kubernetes with the same name (in the same namespace).
+</b></details>
+
+<details>
+<summary>True or False? When a namespace is deleted all resources in that namespace are not deleted but moved to another default namespace</summary><br><b>
+
+False. When a namespace is deleted, the resources in that namespace are deleted as well.
+</b></details>
+
+<details>
+<summary>What special namespaces are there by default when creating a Kubernetes cluster?</summary><br><b>
+
+* default
+* kube-system
+* kube-public
+* kube-node-lease
+</b></details>
+
+<details>
+<summary>What can you find in kube-system namespace?</summary><br><b>
+
+* Master and Kubectl processes
+* System processes
+</b></details>
+
+<details>
+<summary>How to list all namespaces?</code></summary><br><b>
+
+`kubectl get namespaces`
+</b></details>
+
+<details>
+<summary>What kube-public contains?</summary><br><b>
+
+* A configmap, which contains cluster information
+* Publicely accessible data
+</b></details>
+
+<details>
+<summary>How to get the name of the current namespace?</code></summary><br><b>
+
+kubectl config view | grep namespace
+</b></details>
+
+<details>
+<summary>What kube-node-lease contains?</summary><br><b>
+
+It holds information on hearbeats of nodes. Each node gets an object which holds information about its availability.
+</b></details>
+
+<details>
+<summary>How to create a namespace?</summary><br><b>
+
+One way is by running `kubectl create namespace [NAMESPACE_NAME]`
+
+Another way is by using namespace configuration file:
+```
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: some-cofngimap
+  namespace: some-namespace
+```
+</b></details>
+
+<details>
+<summary>What default namespace contains?</summary><br><b>
+
+Any resource you create while using Kubernetes.
+</b></details>
+
+<details>
+<summary>True or False? With namespaces you can limit the resources consumed by the users/teams</summary><br><b>
+
+True. With namespaces you can limit CPU, RAM and storage usage.
+</b></details>
+
+<details>
+<summary>How to switch to another namespace? In other words how to change active namespace?</code></summary><br><b>
+
+`kubectl config set-context --current --namespace=some-namespace` and validate with `kubectl config view --minify | grep namespace:`
+
+OR
+
+`kubens some-namespace`
+</b></details>
+
+<details>
+<summary>What is Resource Quota?</code></summary><br><b>
+</b></details>
+
+<details>
+<summary>How to create a Resource Quota?</code></summary><br><b>
+
+kubectl create quota some-quota --hard-cpu=2,pods=2
+</b></details>
+
+<details>
+<summary>Which resources are accessible from different namespaces?</code></summary><br><b>
+
+Service.
+</b></details>
+
+<details>
+<summary>Let's say you have three namespaces: x, y and z. In x namespace you have a ConfigMap referencing service in z namespace. Can you reference the ConfigMap in x namespace from y namespace?</code></summary><br><b>
+
+No, you would have to create separate namespace in y namespace.
+</b></details>
+
+<details>
+<summary>Which service and in which namespace the following file is referencing?
+
+```
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: some-configmap
+data:
+  some_url: samurai.jack
+```
+</summary><br><b>
+
+It's referencing the service "samurai" in the namespace called "jack".
+</b></details>
+
+<details>
+<summary>Which components can't be created within a namespace?</code></summary><br><b>
+
+Volume and Node.
+</b></details>
+
+<details>
+<summary>How to list all the components that bound to a namespace?</code></summary><br><b>
+
+`kubectl api-resources --namespaced=true`
+</b></details>
+
+<details>
+<summary>How to create components in a namespace?</code></summary><br><b>
+
+One way is by specifying --namespace like this: `kubectl apply -f my_component.yaml --namespace=some-namespace`
+Another way is by specifying it in the YAML itself:
+
+```
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: some-configmap
+  namespace: some-namespace
+```
+
+and you can verify with: `kubectl get configmap -n some-namespace`
+</b></details>
+
+<details>
+<summary>How to execute the command "ls" in an existing pod?</code></summary><br><b>
+
+kubectl exec some-pod -it -- ls
+</b></details>
+
+<details>
+<summary>How to create a service that exposes a deployment?</code></summary><br><b>
+
+kubectl expose deploy some-deployment --port=80 --target-port=8080
+</b></details>
+
+<details>
+<summary>How to create a pod and a service with one command?</code></summary><br><b>
+
+kubectl run nginx --image=nginx --restart=Never --port 80 --expose
+</b></details>
+
+<details>
+<summary>Describe in detail what the following command does <code>kubectl create deployment kubernetes-httpd --image=httpd</code></summary><br><b>
+</b></details>
+
+<details>
+<summary>Why to create kind deployment, if pods can be launched with replicaset?</summary><br><b>
+</b></details>
+
+<details>
+<summary>How to get list of resources which are not in a namespace?</code></summary><br><b>
+
+kubectl api-resources --namespaced=false
+</b></details>
+
+<details>
+<summary>How to delete all pods whose status is not "Running"?</code></summary><br><b>
+
+kubectl delete pods --field-selector=status.phase!='Running'
+</b></details>
+
+<details>
+<summary>What <code>kubectl logs [pod-name]</code> command does?</summary><br><b>
+  Print the logs for a container in a pod.
+</b></details>
+
+<details>
+<summary>What <code>kubectl describe pod [pod name] does?</code> command does?</summary><br><b>
+  Show details of a specific resource or group of resources.
+</b></details>
+
+<details>
+<summary>How to display the resources usages of pods?</summary><br><b>
+
+kubectl top pod
+</b></details>
+
+<details>
+<summary>What <code>kubectl get componentstatus</code> does?</summary><br><b>
+
+Outputs the status of each of the control plane components.
+</b></details>
+
+<details>
+<summary>What is Minikube?</summary><br><b>
+
+Minikube is a lightweight Kubernetes implementation. It create a local virtual machine and deploys a simple (single node) cluster.
+</b></details>
+
+<details>
+<summary>How do you monitor your Kubernetes?</summary><br><b>
+</b></details>
+
+<details>
+<summary>You suspect one of the pods is having issues, what do you do?</summary><br><b>
+
+Start by inspecting the pods status. we can use the command `kubectl get pods` (--all-namespaces for pods in system namespace)<br>
+
+If we see "Error" status, we can keep debugging by running the command `kubectl describe pod [name]`. In case we still don't see anything useful we can try stern for log tailing.<br>
+
+In case we find out there was a temporary issue with the pod or the system, we can try restarting the pod with the following `kubectl scale deployment [name] --replicas=0`<br>
+
+Setting the replicas to 0 will shut down the process. Now start it with `kubectl scale deployment [name] --replicas=1`
+</b></details>
+
+<details>
+<summary>What the Kubernetes Scheduler does?</summary><br><b>
+</b></details>
+
+<details>
+<summary>What happens to running pods if if you stop Kubelet on the worker nodes?</summary><br><b>
+</b></details>
+
+<details>
+<summary>What happens what pods are using too much memory? (more than its limit)</summary><br><b>
+
+They become candidates to for termination.
+</b></details>
+
+<details>
+<summary>Describe how roll-back works</summary><br><b>
+</b></details>
+
+<details>
+<summary>True or False? Memory is a compressible resource, meaning that when a container reach the memory limit, it will keep running</summary><br><b>
+
+False. CPU is a compressible resource while memory is a non compressible resource - once a container reached the memory limit, it will be terminated.
+</b></details>
+
+<details>
+<summary>What is the control loop? How it works?</summary><br><b>
+
+Explained [here](https://www.youtube.com/watch?v=i9V4oCa5f9I)
+</b></details>
+
+#### Kubernetes - Operators
+
+<details>
+<summary>What is an Operator?</summary><br><b>
+
+Explained [here](https://kubernetes.io/docs/concepts/extend-kubernetes/operator)
+
+"Operators are software extensions to Kubernetes that make use of custom resources to manage applications and their components. Operators follow Kubernetes principles, notably the control loop."
+</b></details>
+
+<details>
+<summary>Why do we need Operators?</summary><br><b>
+
+The process of managing stateful applications in Kubernetes isn't as straightforward as managing stateless applications where reaching the desired status and upgrades are both handled the same way for every replica. In stateful applications, upgrading each replica might require different handling due to the stateful nature of the app, each replica might be in a different status. As a result, we often need a human operator to manage stateful applications. Kubernetes Operator is suppose to assist with this.
+
+This also help with automating a standard process on multiple Kubernetes clusters
+</b></details>
+
+<details>
+<summary>What components the Operator consists of?</summary><br><b>
+
+1. CRD (custom resource definition)
+2. Controller - Custom control loop which runs against the CRD
+</b></details>
+
+<details>
+<summary>How Operator works?</summary><br><b>
+
+It uses the control loop used by Kubernetes in general. It watches for changes in the application state. The difference is that is uses a custom control loop.
+In additions.
+
+In addition, it also makes use of CRD's (Custom Resources Definitions) so basically it extends Kubernetes API.
+</b></details>
+
+<details>
+<summary>True or False? Kubernetes Operator used for stateful applications</summary><br><b>
+
+True
+</b></details>
+
+<details>
+<summary>What is the Operator Framework?</summary><br><b>
+
+open source toolkit used to manage k8s native applications, called operators, in an automated and efficient way.
+</b></details>
+
+<details>
+<summary>What components the Operator Framework consists of?</summary><br><b>
+
+1. Operator SDK - allows developers to build operators
+2. Operator Lifecycle Manager - helps to install, update and generally manage the lifecycle of all operators
+3. Operator Metering - Enables usage reporting for operators that provide specialized services
+</b></details>
+
+<details>
+<summary>Describe in detail what is the Operator Lifecycle Manager</summary><br><b>
+
+It's part of the Operator Framework, used for managing the lifecycle of operators. It basically extends Kubernetes so a user can use a declarative way to manage operators (installation, upgrade, ...).
+</b></details>
+
+<details>
+<summary>What openshift-operator-lifecycle-manager namespace includes?</summary><br><b>
+
+It includes:
+
+  * catalog-operator - Resolving and installing ClusterServiceVersions the resource they specify.
+  * olm-operator - Deploys applications defined by ClusterServiceVersion resource
+</b></details>
+
+<details>
+<summary>What is kubconfig? What do you use it for?</summary><br><b>
+</b></details>
+
+<details>
+<summary>Can you use a Deployment for stateful applications?</summary><br><b>
+</b></details>
+
+<details>
+<summary>Explain StatefulSet</summary><br><b>
+  StatefulSet is the workload API object used to manage stateful applications. Manages the deployment and scaling of a set of Pods, and provides guarantees about the ordering and uniqueness of these Pods.[Learn more](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)
+</b></details>
+
+#### Kubernetes - Secrets
+
+<details>
+<summary>Explain Kubernetes Secrets</summary><br><b>
+
+Secrets let you store and manage sensitive information (passwords, ssh keys, etc.)
+</b></details>
+
+<details>
+<summary>How to create a Secret from a key and value?</summary><br><b>
+
+kubectl create secret generic some-secret --from-literal=password='donttellmypassword'
+</b></details>
+
+<details>
+<summary>How to create a Secret from a file?</summary><br><b>
+
+kubectl create secret generic some-secret --from-file=/some/file.txt
+</b></details>
+
+<details>
+<summary>What <code>type: Opaque</code> in a secret file means? What other types are there?</summary><br><b>
+
+Opaque is the default type used for key-value pairs.
+</b></details>
+
+<details>
+<summary>True or False? storing data in a Secret component makes it automatically secured</summary><br><b>
+
+False. Some known security mechanisms like "encryption" aren't enabled by default.
+</b></details>
+
+<details>
+<summary>What is the problem with the following Secret file:
+
+```
+apiVersion: v1   
+kind: Secret
+metadata:
+    name: some-secret
+type: Opaque
+data:
+    password: mySecretPassword
+```
+</summary><br><b>
+Password isn't encrypted.
+You should run something like this: `echo -n 'mySecretPassword' | base64` and paste the result to the file instead of using plain-text.
+</b></details>
+
+<details>
+<summary>How to create a Secret from a configuration file?</summary><br><b>
+
+`kubectl apply -f some-secret.yaml`
+</b></details>
+
+<details>
+<summary>What the following in Deployment configuration file means? 
+
+```
+spec:
+  containers:
+    - name: USER_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: some-secret
+          key: password
+```
+</summary><br><b>
+USER_PASSWORD environment variable will store the value from password key in the secret called "some-secret"
+In other words, you reference a value from a Kubernetes Secret.
+</b></details>
+
+#### Kubernetes - Volumes
+
+<details>
+<summary>True or False? Kubernetes provides data persistence out of the box, so when you restart a pod, data is saved</summary><br><b>
+
+False
+</b></details>
+
+<details>
+<summary>Explain "Persistent Volumes". Why do we need it?</summary><br><b>
+
+Persistent Volumes allow us to save data so basically they provide storage that doesn't depend on the pod lifecycle.
+</b></details>
+
+<details>
+<summary>True or False? Persistent Volume must be available to all nodes because the pod can restart on any of them</summary><br><b>
+
+True
+</b></details>
+
+<details>
+<summary>What types of persistent volumes are there?</summary><br><b>
+
+* NFS
+* iSCSI
+* CephFS
+* ...
+</b></details>
+
+<details>
+<summary>What is PersistentVolumeClaim?</summary><br><b>
+</b></details>
+
+<details>
+<summary>Explain Volume Snapshots</summary><br><b>
+</b></details>
+
+<details>
+<summary>True or False? Kubernetes manages data persistence</summary><br><b>
+
+False
+</b></details>
+
+<details>
+<summary>Explain Storage Classes</summary><br><b>
+</b></details>
+
+<details>
+<summary>Explain "Dynamic Provisioning" and "Static Provisioning"</summary><br><b>
+</b></details>
+
+<details>
+<summary>Explain Access Modes</summary><br><b>
+</b></details>
+
+<details>
+<summary>What is CSI Volume Cloning?</summary><br><b>
+</b></details>
+
+<details>
+<summary>Explain "Ephemeral Volumes"</summary><br><b>
+</b></details>
+
+<details>
+<summary>What types of ephemeral volumes Kubernetes supports?</summary><br><b>
+</b></details>
+
+<details>
+<summary>What is Reclaim Policy?</summary><br><b>
+</b></details>
+
+<details>
+<summary>What reclaim policies are there?</summary><br><b>
+
+* Retain
+* Recycle
+* Delete
+</b></details>
+
+#### Kubernetes - Access Control
+
+<details>
+<summary>What is RBAC?</summary><br><b>
+</b></details>
+
+<details>
+<summary>Explain the <code>Role</code> and <code>RoleBinding"</code> objects</summary><br><b>
+</b></details>
+
+<details>
+<summary>What is the difference between <code>Role</code> and <code>ClusterRole</code> objects?</summary><br><b>
+</b></details>
+
+<details>
+<summary>Explain what are "Service Accounts" and in which scenario would use create/use one</summary><br><b>
+
+[Kubernetes.io](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account): "A service account provides an identity for processes that run in a Pod."
+
+An example of when to use one:
+You define a pipeline that needs to build and push an image. In order to have sufficient permissions to build an push an image, that pipeline would require a service account with sufficient permissions.
+</b></details>
+
+<details>
+<summary>What happens you create a pod and you DON'T specify a service account?</summary><br><b>
+
+The pod is automatically assigned with the default service account (in the namespace where the pod is running).
+</b></details>
+
+<details>
+<summary>Explain how Service Accounts are different from User Accounts</summary><br><b>
+
+  - User accounts are global while Service accounts unique per namespace
+  - User accounts are meant for humans or client processes while Service accounts are for processes which run in pods
+</b></details>
+
+<details>
+<summary>How to list Service Accounts?</summary><br><b>
+
+`kubectl get serviceaccounts`
+</b></details>
+
+<details>
+<summary>Explain "Security Context"</summary><br><b>
+
+[kubernetes.io](https://kubernetes.io/docs/tasks/configure-pod-container/security-context): "A security context defines privilege and access control settings for a Pod or Container."
+</b></details>
+
+#### Kubernetes - Patterns
+
+<details>
+<summary>Explain the sidecar container pattern</summary><br><b>
+</b></details>
+
+#### Kubernetes - CronJob
+
+<details>
+<summary>Explain what is CronJob and what is it used for</summary><br><b>
+</b></details>
+
+<details>
+<summary>What possible issue can arise from using the following spec and how to fix it?
+
+```
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: some-cron-job
+spec:
+  schedule: '*/1 * * * *'
+  startingDeadlineSeconds: 10
+  concurrencyPolicy: Allow
+```
+</summary><br><b>
+
+If the cron job fails, the next job will not replace the previous one due to the "concurrencyPolicy" value which is "Allow". It will keep spawning new jobs and so eventually the system will be filled with failed cron jobs.
+To avoid such problem, the "concurrencyPolicy" value should be either "Replace" or "Forbid".
+</b></details>
+
+<details>
+<summary>What issue might arise from using the following CronJob and how to fix it?
+
+```
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: "some-cron-job"
+spec:
+  schedule: '*/1 * * * *'
+jobTemplate:
+  spec:
+    template:
+      spec:
+      restartPolicy: Never
+      concurrencyPolicy: Forbid
+      successfulJobsHistoryLimit: 1
+      failedJobsHistoryLimit: 1
+```
+</summary><br><b>
+
+The following lines placed under the template:
+
+```
+concurrencyPolicy: Forbid
+successfulJobsHistoryLimit: 1
+failedJobsHistoryLimit: 1
+```
+
+As a result this configuration isn't part of the cron job spec hence the cron job has no limits which can cause issues like OOM and potentially lead to API server being down.<br>
+To fix it, these lines should placed in the spec of the cron job, above or under the "schedule" directive in the above example.
+</b></details>
+
+#### Kubernetes - Misc
+
+<details>
+<summary>Explain Imperative Management vs. Declarative Management</summary><br><b>
+
+</b></details>
+
+<details>
+<summary>Explain what Kubernetes Service Discovery means</summary><br><b>
+</b></details>
+
+<details>
+<summary>You have one Kubernetes cluster and multiple teams that would like to use it. You would like to limit the resources each team consumes in the cluster. Which Kubernetes concept would you use for that?</summary><br><b>
+
+Namespaces will allow to limit resources and also make sure there are no collisions between teams when working in the cluster (like creating an app with the same name).
+</b></details>
+
+<details>
+<summary>What Kube Proxy does?</summary><br><b>
+  Kube Proxy is a network proxy that runs on each node in your cluster, implementing part of the Kubernetes Service concept
+</b></details>
+
+<details>
+<summary>What "Resources Quotas" are used for and how?</summary><br><b>
+</b></details>
+
+<details>
+<summary>Explain ConfigMap</summary><br><b>
+
+Separate configuration from pods.
+It's good for cases where you might need to change configuration at some point but you don't want to restart the application or rebuild the image so you create a ConfigMap and connect it to a pod but externally to the pod.
+
+Overall it's good for:
+* Sharing the same configuration between different pods
+* Storing external to the pod configuration
+</b></details>
+
+<details>
+<summary>How to use ConfigMaps?</summary><br><b>
+
+1. Create it (from key&value, a file or an env file)
+2. Attach it. Mount a configmap as a volume
+</b></details>
+
+<details>
+<summary>True or False? Sensitive data, like credentials, should be stored in a ConfigMap</summary><br><b>
+
+False. Use secret.
+</b></details>
+
+<details>
+<summary>Explain "Horizontal Pod Autoscaler"</summary><br><b>
+
+Scale the number of pods automatically on observed CPU utilization.
+</b></details>
+
+<details>
+<summary>When you delete a pod, is it deleted instantly? (a moment after running the command)</summary><br><b>
+</b></details>
+
+<details>
+<summary>What does being cloud-native mean?</summary><br><b>
+  The term cloud native refers to the concept of building and running applications to take advantage of the distributed computing offered by the cloud delivery model.
+</b></details>
+
+<details>
+<summary>Explain the pet and cattle approach of infrastructure with respect to kubernetes</summary><br><b>
+</b></details>
+
+<details>
+<summary>Describe how you one proceeds to run a containerized web app in K8s, which should be reachable from a public URL.</summary><br><b>
+</b></details>
+
+<details>
+<summary>How would you troubleshoot your cluster if some applications are not reachable any more?</summary><br><b>
+</b></details>
+
+<details>
+<summary>Describe what CustomResourceDefinitions there are in the Kubernetes world? What they can be used for?</summary><br><b>
+</b></details>
+
+<details>
+<summary> How does scheduling work in kubernetes?</summary><br><b>
+
+The control plane component kube-scheduler asks the following questions,
+1. What to schedule? It tries to understand the pod-definition specifications
+2. Which node to schedule? It tries to determine the best node with available resources to spin a pod
+3. Binds the Pod to a given node
+
+View more [here](https://www.youtube.com/watch?v=rDCWxkvPlAw)
+</b></details>
+
+<details>
+<summary> How are labels and selectors used?</summary><br><b>
+</b></details>
+
+<details>
+<summary>What QoS classes are there?</summary><br><b>
+
+* Guaranteed
+* Burstable
+* BestEffort
+</b></details>
+
+<details>
+<summary>Explain Labels. What are they and why would one use them?</summary><br><b>
+</b></details>
+
+<details>
+<summary>Explain Selectors</summary><br><b>
+</b></details>
+
+<details>
+<summary>What is Kubeconfig?</summary><br><b>
+</b></details>
+
+#### Kubernetes - Gatekeeper
+
+<details>
+<summary>What is Gatekeeper?</summary><br><b>
+
+[Gatekeeper docs](https://open-policy-agent.github.io/gatekeeper/website/docs): "Gatekeeper is a validating (mutating TBA) webhook that enforces CRD-based policies executed by Open Policy Agent"
+</b></details>
+
+<details>
+<summary>Explain how Gatekeeper works</summary><br><b>
+
+On every request sent to the Kubernetes cluster, Gatekeeper sends the policies and the resources to OPA (Open Policy Agent) to check if it violates any policy. If it does, Gatekeeper will return the policy error message back. If it isn't violates any policy, the request will reach the cluster.
+</b></details>
+
+#### Kubernetes - Policy Testing
+
+<details>
+<summary>What is Conftest?</summary><br><b>
+
+Conftest allows you to write tests against structured files. You can think of it as tests library for Kubernetes resources.<br>
+It is mostly used in testing environments such as CI pipelines or local hooks.
+</b></details>
+
+<details>
+<summary>What is Datree? How is it different from Conftest?</summary><br><b>
+
+Same as Conftest, it is used for policy testing and enforcement. The difference is that it comes with built-in policies.
+</b></details>
+
+#### Kubernetes - Helm
+
+<details>
+<summary>What is Helm?</summary><br><b>
+
+Package manager for Kubernetes. Basically the ability to package YAML files and distribute them to other users and apply them in different clusters.
+</b></details>
+
+<details>
+<summary>Why do we need Helm? What would be the use case for using it?</summary><br><b>
+
+Sometimes when you would like to deploy a certain application to your cluster, you need to create multiple YAML files/components like: Secret, Service, ConfigMap, etc. This can be tedious task. So it would make sense to ease the process by introducing something that will allow us to share these bundle of YAMLs every time we would like to add an application to our cluster. This something is called Helm.
+
+A common scenario is having multiple Kubernetes clusters (prod, dev, staging). Instead of individually applying different YAMLs in each cluster, it makes more sense to create one Chart and install it in every cluster.
+</b></details>
+
+<details>
+<summary>Explain "Helm Charts"</summary><br><b>
+
+Helm Charts is a bundle of YAML files. A bundle that you can consume from repositories or create your own and publish it to the repositories.
+</b></details>
+
+<details>
+<summary>It is said that Helm is also Templating Engine. What does it mean?</summary><br><b>
+
+It is useful for scenarios where you have multiple applications and all are similar, so there are minor differences in their configuration files and most values are the same. With Helm you can define a common blueprint for all of them and the values that are not fixed and change can be placeholders. This is called a template file and it looks similar to the following
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {[ .Values.name ]}
+spec:
+  containers:
+  - name: {{ .Values.container.name }}
+  image: {{ .Values.container.image }}
+  port: {{ .Values.container.port }}
+```
+
+The values themselves will in separate file:
+
+```
+name: some-app
+container:
+  name: some-app-container
+  image: some-app-image
+  port: 1991
+```
+</b></details>
+
+<details>
+<summary>What are some use cases for using Helm template file?</summary><br><b>
+
+* Deploy the same application across multiple different environments
+* CI/CD
+</b></details>
+
+<details>
+<summary>Explain the Helm Chart Directory Structure</summary><br><b>
+
+someChart/     -> the name of the chart
+  Chart.yaml   -> meta information on the chart
+  values.yaml  -> values for template files
+  charts/      -> chart dependencies
+  templates/   -> templates files :)
+</b></details>
+
+<details>
+<summary>How do you search for charts?</summary><br><b>
+
+`helm search hub [some_keyword]`
+</b></details>
+
+<details>
+<summary>Is it possible to override values in values.yaml file when installing a chart?</summary><br><b>
+Yes. You can pass another values file:
+`helm install --values=override-values.yaml [CHART_NAME]`
+
+Or directly on the command line: `helm install --set some_key=some_value`
+</b></details>
+
+<details>
+<summary>How Helm supports release management?</summary><br><b>
+
+Helm allows you to upgrade, remove and rollback to previous versions of charts. In version 2 of Helm it was with what is known as "Tiller". In version 3, it was removed due to security concerns.
+</b></details>
+
+#### Kubernetes - Security
+
+<details>
+<summary>What security best practices do you follow in regards to the Kubernetes cluster?</summary><br><b>
+
+  * Secure inter-service communication (one way is to use Istio to provide mutual TLS)
+  * Isolate different resources into separate namespaces based on some logical groups
+  * Use supported container runtime (if you use Docker then drop it because it's deprecated. You might want to CRI-O as an engine and podman for CLI)
+  * Test properly changes to the cluster (e.g. consider using Datree to prevent kubernetes misconfigurations)
+  * Limit who can do what (by using for example OPA gatekeeper) in the cluster
+  * Use NetworkPolicy to apply network security
+  * Consider using tools (e.g. Falco) for monitoring threats
+</b></details>
+
+#### Kubernetes - Troubleshooting Scenarios
+
+<details>
+<summary>Running <code>kubectl get pods</code> you see Pods in "Pending" status. What would you do?</summary><br><b>
+
+One possible path is to run `kubectl describe pod <pod name>` to get more details.<br>
+You might see one of the following:
+  * Cluster is full. In this case, extend the cluster.
+  * ResourcesQuota limits are met. In this case you might want to modify them
+  * Check if PersistentVolumeClaim mount is pending
+
+If none of the above helped, run the command (`get pods`) with `-o wide` to see if the node is assigned to a node. If not, there might be an issue with scheduler.
+</b></details>
+
+<details>
+<summary>Users unable to reach an application running on a Pod on Kubernetes. What might be the issue and how to check?</summary><br><b>
+
+One possible path is to start with checking the Pod status.
+1. Is the Pod pending? if yes, check for the reason with `kubectl describe pod <pod name>`
+TODO: finish this...
+</b></details>
+
+#### Kubernetes - Submariner
+
+<details>
+<summary>Explain what is Submariner and what is it used for</summary><br><b>
+
+"Submariner enables direct networking between pods and services in different Kubernetes clusters, either on premise or in the cloud."
+
+You can learn more [here](https://submariner-io.github.io)
+</b></details>
+
+<details>
+<summary>What each of the following components does?:
+
+  * Lighthouse
+  * Broker
+  * Gateway Engine
+  * Route Agent</summary><br><b>
+</b></details>
+
+#### Kubernetes - Istio
+
+<details>
+<summary>What is Istio? What is it used for?</summary><br><b>
+</b></details>
+
+#### Kubernetes - Scenarios
+
+<details>
+<summary>An engineer form your organization told you he is interested only in seeing his team resources in Kubernetes. Instead, in reality, he sees resources of the whole organization, from multiple different teams. What Kubernetes concept can you use in order to deal with it?</summary><br><b>
+
+Namespaces. See the following [namespaces question and answer](#namespaces-use-cases) for more information.
 </b></details>
